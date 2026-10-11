@@ -6,6 +6,13 @@
                 "artisan",
                 "boost:mcp"
             ]
+        },
+        "laravel-tasks": {
+            "type": "http",
+            "url": "http://localhost:8000/mcp/tasks",
+            "tools": [
+                "*"
+            ]
         }
     }
 }

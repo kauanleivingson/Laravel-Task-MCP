@@ -10,7 +10,7 @@ use Laravel\Mcp\Server\Attributes\Version;
 
 #[Name('Task Server')]
 #[Version('0.0.1')]
-#[Instructions('Create and manage tasks in the application. Use create_task to save a task with a title and optional details.')]
+#[Instructions('Create tasks with create_task only after collecting the required title and due date from the user. If either is missing, ask the user before calling the tool. Never invent or assume required information. The description, priority, and status are optional; use the tool defaults when they are not provided.')]
 class TaskServer extends Server
 {
     protected array $tools = [

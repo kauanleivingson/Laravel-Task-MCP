@@ -15,7 +15,7 @@ class TaskForm
         return $schema->components([
             TextInput::make('title')
                 ->required()
-                ->maxLength(255),
+                ->max(255),
 
             Textarea::make('description'),
 

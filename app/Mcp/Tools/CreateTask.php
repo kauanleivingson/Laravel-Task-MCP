@@ -13,16 +13,16 @@ class CreateTask extends Tool
 {
     protected string $name = 'create_task';
 
-    protected string $description = 'Create a task with a title and optional description, priority, status, and due date.';
+    protected string $description = 'Create a task only after collecting its title and due date from the user. If either is missing, ask the user before calling this tool. Never invent or assume required information.';
 
     public function schema(JsonSchema $schema): array
     {
         return [
             'title' => $schema->string()->max(255)->description('A short title for the task.')->required(),
-            'description' => $schema->string()->description('Additional details about the task.'),
-            'priority' => $schema->string()->enum(['low', 'medium', 'high'])->description('Task priority; defaults to medium.'),
-            'status' => $schema->string()->enum(['pending', 'in_progress', 'completed'])->description('Task status; defaults to pending.'),
-            'due_date' => $schema->string()->description('Optional due date in YYYY-MM-DD format.'),
+            'description' => $schema->string()->description('Optional additional details about the task.'),
+            'priority' => $schema->string()->enum(['low', 'medium', 'high'])->description('Task priority; defaults to medium if omitted.'),
+            'status' => $schema->string()->enum(['pending', 'in_progress', 'completed'])->description('Task status; defaults to pending if omitted.'),
+            'due_date' => $schema->string()->description('Required due date in YYYY-MM-DD format. Ask the user for this value if it is missing; do not set it to today or now.')->required(),
         ];
     }
 
@@ -33,10 +33,13 @@ class CreateTask extends Tool
             'description' => ['nullable', 'string'],
             'priority' => ['sometimes', 'required', 'string', 'in:low,medium,high'],
             'status' => ['sometimes', 'required', 'string', 'in:pending,in_progress,completed'],
-            'due_date' => ['nullable', 'date_format:Y-m-d'],
+            'due_date' => ['required', 'date_format:Y-m-d'],
         ]);
 
-        $task = Task::create($attributes); 
+        $attributes['priority'] ??= 'medium';
+        $attributes['status'] ??= 'pending';
+
+        $task = Task::create($attributes);
 
         return Response::structured([
             'id' => $task->id,

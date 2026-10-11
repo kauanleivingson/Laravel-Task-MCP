@@ -16,11 +16,19 @@ class McpTaskToolTest extends TestCase
         TaskServer::tools()->assertRegistered(CreateTask::class);
     }
 
-    public function test_ai_can_create_a_task_with_default_values(): void
+    public function test_tool_schema_marks_only_title_and_due_date_as_required(): void
+    {
+        $inputSchema = (new CreateTask)->toArray()['inputSchema'];
+
+        $this->assertSame(['title', 'due_date'], $inputSchema['required']);
+    }
+
+    public function test_ai_can_create_a_task_when_due_date_is_provided(): void
     {
         TaskServer::tool(CreateTask::class, [
             'title' => 'Prepare launch checklist',
             'description' => 'Confirm the release steps.',
+            'due_date' => '2026-10-12',
         ])
             ->assertOk()
             ->assertStructuredContent([
@@ -29,20 +37,32 @@ class McpTaskToolTest extends TestCase
                 'description' => 'Confirm the release steps.',
                 'priority' => 'medium',
                 'status' => 'pending',
-                'due_date' => null,
+                'due_date' => '2026-10-12',
             ]);
 
         $this->assertDatabaseHas('tasks', [
             'title' => 'Prepare launch checklist',
             'priority' => 'medium',
             'status' => 'pending',
+            'due_date' => '2026-10-12',
         ]);
+    }
+
+    public function test_ai_must_collect_due_date_before_creating_a_task(): void
+    {
+        TaskServer::tool(CreateTask::class, [
+            'title' => 'Missing due date',
+            'description' => 'This should fail until the user provides a due date.',
+        ])->assertHasErrors();
+
+        $this->assertDatabaseCount('tasks', 0);
     }
 
     public function test_ai_cannot_create_a_task_with_an_invalid_priority(): void
     {
         TaskServer::tool(CreateTask::class, [
             'title' => 'Invalid task',
+            'due_date' => '2026-10-12',
             'priority' => 'urgent',
         ])->assertHasErrors();
 
