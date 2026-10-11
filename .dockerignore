@@ -1,0 +1,15 @@
+.git
+.gitignore
+.env
+.env.*
+node_modules
+vendor
+storage
+bootstrap/cache/*.php
+.phpunit.cache
+coverage
+.vscode
+.idea
+.DS_Store
+npm-debug.log*
+*.log
