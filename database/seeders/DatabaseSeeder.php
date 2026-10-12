@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use RuntimeException;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +16,22 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        $this->call(RoleSeeder::class);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        $adminPassword = config('app.seed_admin.password');
+
+        if (! is_string($adminPassword) || $adminPassword === '') {
+            throw new RuntimeException('Set SEED_ADMIN_PASSWORD before running the database seeder.');
+        }
+
+        $admin = User::firstOrCreate(
+            ['email' => config('app.seed_admin.email')],
+            [
+                'name' => config('app.seed_admin.name'),
+                'password' => $adminPassword,
+            ],
+        );
+
+        $admin->syncRoles('admin');
     }
 }

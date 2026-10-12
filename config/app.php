@@ -105,6 +105,12 @@ return [
         ),
     ],
 
+    'seed_admin' => [
+        'name' => env('SEED_ADMIN_NAME', 'admin'),
+        'email' => env('SEED_ADMIN_EMAIL', 'admin@shopee.com'),
+        'password' => env('SEED_ADMIN_PASSWORD'),
+    ],
+
     /*
     |--------------------------------------------------------------------------
     | Maintenance Mode Driver
